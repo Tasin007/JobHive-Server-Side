@@ -73,6 +73,14 @@ async function run() {
     res.send(result);
   })
 
+  // update service by id
+
+  app.get("/api/v1/update-jobs/:jobId", async (req, res) => {
+    const jobId = req.params.jobId;
+      const query = { _id: new ObjectId(jobId) };
+      const result = await collection.findOne(query);
+      res.send(result);
+  });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
