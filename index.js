@@ -46,6 +46,15 @@ async function run() {
         const result = await collection.insertOne(job);
         res.send(result);
       })
+
+       // single job by job id
+    app.get("/api/v1/jobs/:jobId", async (req, res) => {
+      const id = req.params.jobId;
+      const query = { _id: new ObjectId(id) };
+      const result = await collection.findOne(query);
+      res.send(result);
+  });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
