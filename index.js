@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 
 const port = process.env.PORT || 3000;
@@ -28,6 +28,7 @@ async function run() {
 
     // connect collection
     const collection = client.db("JobHiveDB").collection("jobs");
+    const applicationCollection = client.db("JobHiveDB").collection("applications");
 
     app.get("/api/v1/jobs", async (req, res) => {
         try {
@@ -47,13 +48,16 @@ async function run() {
         res.send(result);
       })
 
-       // single job by job id
+      
+
+      // single job by job id
     app.get("/api/v1/jobs/:jobId", async (req, res) => {
       const id = req.params.jobId;
       const query = { _id: new ObjectId(id) };
       const result = await collection.findOne(query);
       res.send(result);
   });
+
   app.get("/api/v1/applications", async (req, res) => {
     const cursor = applicationCollection.find();
     const jobs = await cursor.toArray();
@@ -73,14 +77,44 @@ async function run() {
     res.send(result);
   })
 
-  // update service by id
+      // update service by id
 
-  app.get("/api/v1/update-jobs/:jobId", async (req, res) => {
-    const jobId = req.params.jobId;
-      const query = { _id: new ObjectId(jobId) };
-      const result = await collection.findOne(query);
-      res.send(result);
-  });
+      app.get("/api/v1/update-jobs/:jobId", async (req, res) => {
+        const jobId = req.params.jobId;
+          const query = { _id: new ObjectId(jobId) };
+          const result = await collection.findOne(query);
+          res.send(result);
+      });
+  
+      app.put("/api/v1/jobs/:jobId", async (req, res) => {
+        const jobId = req.params.jobId;
+        const updatedJob = req.body;
+        const filter = { _id: new ObjectId(jobId) };
+        const options = { upsert: true };
+        const updateDoc = {
+          $set: {
+            title: updatedJob.title,
+            banner: updatedJob.banner,
+            description: updatedJob.description,
+            salary: updatedJob.salary,
+            logo: updatedJob.logo,
+            category: updatedJob.category,
+            jobApplicantsNumber: updatedJob.jobApplicantsNumber,
+            applicantName: updatedJob.applicantName,
+            providerMail: updatedJob.providerMail,
+            postedBy: updatedJob.postedBy,
+            postingDate: updatedJob.postingDate,
+            applicationDeadline: updatedJob.applicationDeadline,
+          },
+        };
+        const result = await collection.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        res.send(result);
+      });
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -95,7 +129,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("JobHive server is Running" );
+  res.send({ message: "JobHive server is Running" });
 });
 
 app.listen(port, () => {
