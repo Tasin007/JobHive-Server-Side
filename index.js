@@ -40,6 +40,12 @@ async function run() {
           res.status(500).json({ error: "Internal Server Error" });
         }
       });
+
+      app.post("/api/v1/jobs", async (req, res) => {
+        const job = req.body;
+        const result = await collection.insertOne(job);
+        res.send(result);
+      })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
