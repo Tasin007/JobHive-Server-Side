@@ -54,6 +54,25 @@ async function run() {
       const result = await collection.findOne(query);
       res.send(result);
   });
+  app.get("/api/v1/applications", async (req, res) => {
+    const cursor = applicationCollection.find();
+    const jobs = await cursor.toArray();
+    res.send(jobs);
+  })
+
+  app.post("/api/v1/applications", async (req, res) => {
+    const job = req.body;
+    const result = await applicationCollection.insertOne(job);
+    res.send(result);
+  })
+
+  app.delete('/api/v1/jobs/:title', async (req, res) =>{
+    const title = req.params.title;
+    const query = {title: title};
+    const result = await collection.deleteOne(query);
+    res.send(result);
+  })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
